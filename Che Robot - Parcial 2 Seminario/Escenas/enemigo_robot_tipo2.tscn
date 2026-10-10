@@ -1,0 +1,135 @@
+[gd_scene format=3 uid="uid://gnr5rmctyoti"]
+
+[ext_resource type="Texture2D" uid="uid://5baumugq5ekf" path="res://Sprites/robot1_machine.png" id="2_pwifj"]
+[ext_resource type="StyleBox" uid="uid://bosln6jkgioby" path="res://backProgressHitman.tres" id="3_c370q"]
+[ext_resource type="Script" uid="uid://cx1hrahcy8jtj" path="res://Escenas/VidaRobotTipo2.gd" id="4_ckqmy"]
+
+[sub_resource type="GDScript" id="GDScript_pwifj"]
+script/source = "extends CharacterBody2D
+
+class_name enemigo_robot_tipo2
+
+@onready var vida_robot_tipo_2: ProgressBar = $Node/VidaRobotTipo2
+@onready var sprite: Sprite2D = $Sprite2D
+
+
+@onready var timer: Timer = $Timer
+@onready var hitman: CharacterBody2D = $Hitman
+
+@onready var marcador: Marker2D = $Marker2D
+
+@onready var ray_cast_pared: RayCast2D = $RayCast2D
+@onready var ray_cast_jugador: RayCast2D = $RayCast2D2
+
+const BALA_ROBOT = preload(\"uid://bijmdg1l66ksg\")
+
+var velocidad : float = 100.0
+var direccion: int = 1
+var vida = 100
+var player 
+
+func _ready() -> void:
+	player = get_tree().get_first_node_in_group(\"Hitman\")
+	vida_robot_tipo_2.max_value = vida
+
+func _physics_process(delta: float) -> void:
+	apuntar()
+	posicionHitman()
+	
+	if player: 
+		look_at(player.global_position)
+	
+	if ray_cast_pared.is_colliding():
+		direccion *= -1
+		ray_cast_pared.target_position.x *= -1
+
+	velocity = Vector2(direccion * velocidad, 0)
+	move_and_slide()
+func girar():
+	direccion *= -1
+	
+	# 2. ESTO ES LO MÁS IMPORTANTE: giramos el rayo también
+	ray_cast_pared.target_position.x *= -1
+
+func apuntar():
+	ray_cast_jugador.target_position = to_local(player.position)
+
+func posicionHitman():
+	if ray_cast_jugador.get_collider() == player and timer.is_stopped():
+		timer.start()
+	elif ray_cast_jugador.get_collider() != player and not timer.is_stopped():
+		timer.stop()
+	pass
+
+
+func _on_timer_timeout() -> void:
+	disparar() 
+	pass 
+
+func disparar():
+		var instanciaDeBala = BALA_ROBOT.instantiate()
+		var referencia = ray_cast_jugador.get_collision_point()
+		var direc = (referencia - global_position)
+		
+		get_tree().root.add_child(instanciaDeBala)
+		instanciaDeBala.global_position = marcador.global_position
+		instanciaDeBala.direction = (direc).normalized()
+
+func terminar_juego() -> void:
+	get_tree().reload_current_scene()
+
+func recibirDaño(cantidad):
+	vida_robot_tipo_2.value -= cantidad
+	if vida_robot_tipo_2.value == 0:
+		queue_free()
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_c370q"]
+size = Vector2(20.026257, 47.99977)
+
+[node name="EnemigoRobotTipo2" type="CharacterBody2D" unique_id=54521770]
+light_mask = 4
+visibility_layer = 3
+rotation = 3.1380315
+scale = Vector2(1.3166231, 1.3166231)
+script = SubResource("GDScript_pwifj")
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1772836811]
+position = Vector2(-3.332894e-11, -4.5806947)
+rotation = 1.5707327
+scale = Vector2(1, 1.244186)
+texture = ExtResource("2_pwifj")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=888766918 groups=["RobotTipo2"]]
+position = Vector2(0.00085378066, -14.018439)
+rotation = 1.5738857
+scale = Vector2(0.99999976, 0.99999976)
+shape = SubResource("RectangleShape2D_c370q")
+
+[node name="Marker2D" type="Marker2D" parent="." unique_id=220165255]
+position = Vector2(0, 4.5806947)
+scale = Vector2(57.377937, -1343.0872)
+
+[node name="RayCast2D" type="RayCast2D" parent="." unique_id=984896964]
+target_position = Vector2(-0.12982899, 36.456673)
+
+[node name="RayCast2D2" type="RayCast2D" parent="." unique_id=1221010188]
+target_position = Vector2(-0.6058686, 170.13115)
+
+[node name="Timer" type="Timer" parent="." unique_id=1283542717]
+
+[node name="Node" type="Node" parent="." unique_id=535944958]
+
+[node name="VidaRobotTipo2" type="ProgressBar" parent="Node" unique_id=801813669]
+offset_left = -40.0
+offset_top = -56.0
+offset_right = 40.0
+offset_bottom = -48.0
+theme_override_styles/background = ExtResource("3_c370q")
+step = 1.0
+value = 100.0
+show_percentage = false
+script = ExtResource("4_ckqmy")
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

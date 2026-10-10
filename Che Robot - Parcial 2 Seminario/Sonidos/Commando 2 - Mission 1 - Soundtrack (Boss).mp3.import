@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://dxlth605xm6m0"
+path="res://.godot/imported/Commando 2 - Mission 1 - Soundtrack (Boss).mp3-7fac9c35380e00100b4ea72229bc1ab3.mp3str"
+
+[deps]
+
+source_file="res://Sonidos/Commando 2 - Mission 1 - Soundtrack (Boss).mp3"
+dest_files=["res://.godot/imported/Commando 2 - Mission 1 - Soundtrack (Boss).mp3-7fac9c35380e00100b4ea72229bc1ab3.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
